@@ -43,26 +43,27 @@ function handleResponse(e) {
       .setMimeType(ContentService.MimeType.JSON);
     }
 
-// Check custom_referer
-var customReferer = e.parameter.custom_referer || "";
-if (customReferer !== EXPECTED_REFERER) {
-  return ContentService
-    .createTextOutput(JSON.stringify({"result":"error", "error": "Unauthorized - Invalid custom_referer"}))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+  // Check custom_referer
+/*
+  var customReferer = e.parameter.custom_referer || "";
+  if (customReferer !== EXPECTED_REFERER) {
+    return ContentService
+      .createTextOutput(JSON.stringify({"result":"error", "error": "Unauthorized - Invalid custom_referer"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+*/
+  try {
+    // next set where we write the data - you could write to multiple/alternate destinations
+    var doc = SpreadsheetApp.openById(SHEET_KEY);
+    var sheet = doc.getSheetByName(SHEET_NAME);
 
-try {
-   // next set where we write the data - you could write to multiple/alternate destinations
-   var doc = SpreadsheetApp.openById(SHEET_KEY);
-   var sheet = doc.getSheetByName(SHEET_NAME);
-
-   // we'll assume header is in row 1 but you can override with header_row in GET/POST data
-   var headRow = e.parameter.header_row || 1;
-   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-   var nextRow = sheet.getLastRow()+1; // get next row
-   var row = [];
-   // loop through the header columns
-   for (i in headers){
+    // we'll assume header is in row 1 but you can override with header_row in GET/POST data
+    var headRow = e.parameter.header_row || 1;
+    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    var nextRow = sheet.getLastRow()+1; // get next row
+    var row = [];
+    // loop through the header columns
+    for (i in headers){
       if (headers[i] == "Timestamp"){ // special case if you include a 'Timestamp' column
         row.push(new Date());
       } else { // else use header name to get data
